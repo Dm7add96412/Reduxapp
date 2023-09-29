@@ -5,9 +5,17 @@ import { Link, Outlet } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Search from '../components/Search'
 
+const iconStyles = {
+    color: 'black',
+    '&:hover': {
+        transform: 'translateY(-0.2cm)',
+        cursor: 'pointer'
+    }
+  }
+
 function HomeIcon(props: SvgIconProps) {
     return (
-      <SvgIcon {...props}>
+      <SvgIcon {...props} sx={iconStyles}>
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
       </SvgIcon>
     );
@@ -27,7 +35,7 @@ const Root = () => {
                 spacing={2}>
                     <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Link to="/">
-                            <HomeIcon fontSize='large'/>
+                            <HomeIcon fontSize='large' />
                         </Link>
                     </Grid>
                     <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>

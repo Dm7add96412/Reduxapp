@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react'
 
 import App from './App';
-import './index.css';
+import './style.css';
 import store, { persistor } from './redux/store';
 
 const container = document.getElementById('root')!;
@@ -18,4 +18,4 @@ root.render(
       </PersistGate>
     </Provider>
   </React.StrictMode>
-);
+); 
