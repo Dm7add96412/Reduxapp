@@ -8,10 +8,11 @@ const initialState: {
     products: Product[],
     error?: string,
     loading: boolean,
-    productsLength?: number
+    productsLength?: number,
+    product?: Product
 } = {
     products: [],
-    loading: false
+    loading: false,
 }
 
 export const fetchAllProductsPagination = createAsyncThunk(
@@ -44,6 +45,21 @@ export const fetchPProductsLength = createAsyncThunk(
     }
 )
 
+export const fetchSingleProduct = createAsyncThunk(
+    'fetchSingleProduct',
+    async(productId: string) => {
+        try {
+            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/${productId}`)
+            const data: Product = response.data
+            return data
+        } catch(e) {
+            const error = e as AxiosError
+            console.log('Axios error, fetch all products:', error.response?.status, error.message)
+            return error
+        }
+    }
+)
+
 const productsSlice = createSlice(
     {
     name: 'productsSlice',
@@ -67,6 +83,7 @@ const productsSlice = createSlice(
     },
         // async functions here, with all the three steps
         extraReducers: (builder) => {
+            // FETCH ALL PRODUCTS PAGINATION
             builder.addCase(fetchAllProductsPagination.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
                     return {
@@ -92,6 +109,7 @@ const productsSlice = createSlice(
                     }
                 }
             })
+            // FETCH PRODUCTS LENGTH
             builder.addCase(fetchPProductsLength.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
                     return {
@@ -113,6 +131,31 @@ const productsSlice = createSlice(
                         ...state,
                         loading: false,
                         error: action.error.message
+                    }
+                }
+            })
+            // FETCH SINGLE PRODUCT
+            builder.addCase(fetchSingleProduct.fulfilled, (state, action) => {
+                if(!(action.payload instanceof AxiosError)) {
+                    return {
+                        ...state,
+                        product: action.payload,
+                        loading: false
+                    }
+                }
+            })
+            builder.addCase(fetchSingleProduct.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(fetchSingleProduct.rejected, (state, action) => {
+                if(action.payload instanceof AxiosError) {
+                    return {
+                        ...state,
+                        error: action.error.message,
+                        loading: false
                     }
                 }
             })

@@ -9,7 +9,7 @@ const iconStyles = {
     color: 'black',
     '&:hover': {
         transform: 'translateY(-0.2cm)',
-        cursor: 'pointer'
+
     }
   }
 
@@ -29,16 +29,16 @@ const Root = () => {
             <nav>
                 <Grid container 
                 direction="row"
-                justifyContent="space-between"
+                justifyContent="center"
                 alignItems="center"
                 padding={4}
                 spacing={2}>
-                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'end' }}>
                         <Link to="/">
                             <HomeIcon fontSize='large' />
                         </Link>
                     </Grid>
-                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'end' }}>
                         <Link to="/browseproducts">
                             PRODUCTS
                         </Link>
@@ -46,7 +46,7 @@ const Root = () => {
                     <Grid xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Search/>
                     </Grid>
-                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'start' }}>
                         {!loggedIn ? 
                         <Link to="/login">
                         LOGIN
@@ -55,17 +55,15 @@ const Root = () => {
                         PROFILEPAGE
                         </Link>}
                     </Grid>
-                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Grid xs={2} sx={{ display: 'flex', justifyContent: 'start' }}>
                         <Link to="/shoppingcart">
                             SHOPPING CART
                         </Link>
                     </Grid>
                 </Grid>
             </nav>
-        </header>
-                            
+        </header>                    
             <Outlet/>
-
         <footer>
         </footer>
     </div>

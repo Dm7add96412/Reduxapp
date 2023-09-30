@@ -3,5 +3,10 @@ export default interface Product {
     title: string,
     price: number,
     description: string,
-    images: string[]
+    images: string[],
+    category?: {
+        id: number,
+        name: string,
+        image: string
+    }
 }

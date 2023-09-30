@@ -3,31 +3,23 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Unstable_Grid2'
 import Box from '@mui/material/Box'
 import Pagination from '@mui/material/Pagination'
-import axios, { AxiosError } from 'axios'
+import Button from '@mui/material/Button'
+import { useNavigate } from 'react-router-dom'
 
 import useAppSelector from '../hook/useAppSelector'
 import useAppDispatch from '../hook/useAppDispatch'
 import { fetchPProductsLength, fetchAllProductsPagination } from '../redux/reducers/productsReducer'
-import Product from '../types/Product'
 
 const BrowseProducts = () => {
     const {products , loading, error, productsLength } = useAppSelector(state => state.productsReducer)
     const [currentPage, setCurrentPage] = useState<number>(1)
-    const [totalPages, settotalPages] = useState<number>(0)
     const limit = 50
 
     const dispatch = useAppDispatch()
+    const navigate = useNavigate()
 
     useEffect(() => {
-        axios.get(`https://api.escuelajs.co/api/v1/products`)
-            .then((response) => {
-                settotalPages(Math.ceil(response.data.length / limit))
-                console.log(Math.ceil(response.data.length / limit))
-            })
-            .catch(e => {
-                const error = e as AxiosError
-                console.log('Axios error, fetch all products:', error.response?.status, error.message)
-            })
+        dispatch(fetchPProductsLength())
     },[])
 
     useEffect(() => {
@@ -37,7 +29,6 @@ const BrowseProducts = () => {
 
     const handlePageClick = (event: React.ChangeEvent<unknown>, page: number) => {
         setCurrentPage(page)
-        console.log(page)
     }
 
   return (
@@ -55,28 +46,53 @@ const BrowseProducts = () => {
                 padding={2}
                 justifyContent="center"
                 alignItems="center">
-                <Pagination count={totalPages} 
+                <Pagination count={productsLength && Math.ceil(productsLength / limit)} 
                 color='standard'
                 onChange={handlePageClick}
-                defaultPage={currentPage}/>
+                page={currentPage}/>
         </Grid>}
-        {!loading && products.map(p => 
-            <Grid container spacing={2} 
-                padding={1}
-                key={p.id}>
-                    <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-                        IMAGE
-                    </Grid>
-                    <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-                        {p.title}
-                    </Grid>
-                    <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-                        {p.price}€
-                    </Grid>
-                    <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-                        ADD TO CART
-                    </Grid>
-            </Grid>)}
+        <Grid container spacing={2}
+                padding={2}
+                justifyContent="center"
+                alignItems="center">
+            <Grid xs={3}></Grid>
+            <Grid xs={6} >
+            {!loading && products.map(p => 
+                <Grid container spacing={1} 
+                    padding={1}
+                    key={p.id}
+                    border={1}
+                    borderRadius={8}
+                    alignItems="center"
+                    justifyContent="space-evenly">
+                        
+                        <Grid xs={3} sx={{ display: 'flex', justifyContent: 'start' }}>
+                            <img src={p.images[0] ? p.images[0] : p.category?.image} alt={p.title} width="150" height="150"/>
+                        </Grid>
+                        <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
+                            {p.title}
+                        </Grid>
+                        <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
+                            {p.price}€
+                        </Grid>
+                        <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignSelf: 'center'}}>
+                            <Button
+                            size='small'
+                            variant='outlined'
+                            onClick={() => navigate(`/singleproduct/${p.id}`)}>
+                                DETAILS
+                            </Button>
+                            <Button
+                            size='small'
+                            variant='contained'>
+                                Add to Cart
+                            </Button>
+                        </Grid>
+                        
+                </Grid>)}
+            </Grid>  
+            <Grid xs={3}></Grid>      
+        </Grid>
     </Box>
   )
 }

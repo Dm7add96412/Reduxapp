@@ -8,6 +8,7 @@ import ShoppingCart from './pages/ShoppingCart'
 import Profile from './pages/Profile'
 import Login from './pages/Login'
 import SearchPage from './pages/SearchPage'
+import SingleProduct from './pages/SingleProduct'
 
 const App = () => {
 
@@ -24,10 +25,10 @@ const App = () => {
           path: "/browseproducts",
           element: <BrowseProducts/>
         },
-        // {
-        //   path: "/singleproduct/:productId",
-        //   element: <SingleProduct/>
-        // },
+        {
+          path: "/singleproduct/:productId",
+          element: <SingleProduct/>
+        },
         {          
           path: "/search/:searchWord",
           element: <SearchPage/>
