@@ -9,7 +9,6 @@ const iconStyles = {
     color: 'black',
     '&:hover': {
         transform: 'translateY(-0.2cm)',
-
     }
   }
 
@@ -28,7 +27,6 @@ const Root = () => {
         <header>
             <nav>
                 <Grid container 
-                direction="row"
                 justifyContent="center"
                 alignItems="center"
                 padding={4}

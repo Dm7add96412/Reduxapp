@@ -8,11 +8,11 @@ import { useNavigate } from 'react-router-dom'
 
 import useAppSelector from '../hook/useAppSelector'
 import useAppDispatch from '../hook/useAppDispatch'
-import { fetchPProductsLength, fetchAllProductsPagination } from '../redux/reducers/productsReducer'
+import { fetchPProductsLength, fetchAllProductsPagination, preservePagination } from '../redux/reducers/productsReducer'
 
 const BrowseProducts = () => {
-    const {products , loading, error, productsLength } = useAppSelector(state => state.productsReducer)
-    const [currentPage, setCurrentPage] = useState<number>(1)
+    const {products , loading, error, productsLength, page } = useAppSelector(state => state.productsReducer)
+    const [currentPage, setCurrentPage] = useState<number>(page || 1)
     const limit = 50
 
     const dispatch = useAppDispatch()
@@ -23,11 +23,13 @@ const BrowseProducts = () => {
     },[])
 
     useEffect(() => {
+        console.log(currentPage)
         const offset = (currentPage - 1) * limit
         dispatch(fetchAllProductsPagination({offset, limit}))
         }, [currentPage])
 
     const handlePageClick = (event: React.ChangeEvent<unknown>, page: number) => {
+        dispatch(preservePagination(page))
         setCurrentPage(page)
     }
 
@@ -54,18 +56,18 @@ const BrowseProducts = () => {
         <Grid container spacing={2}
                 padding={2}
                 justifyContent="center"
-                alignItems="center">
+                alignItems="center"
+                >
             <Grid xs={3}></Grid>
-            <Grid xs={6} >
+            <Grid xs={6} rowGap={6}>
             {!loading && products.map(p => 
-                <Grid container spacing={1} 
-                    padding={1}
+                <Grid container spacing={-2} 
+                    padding={4}
                     key={p.id}
                     border={1}
-                    borderRadius={8}
+                    borderRadius={4}
                     alignItems="center"
                     justifyContent="space-evenly">
-                        
                         <Grid xs={3} sx={{ display: 'flex', justifyContent: 'start' }}>
                             <img src={p.images[0] ? p.images[0] : p.category?.image} alt={p.title} width="150" height="150"/>
                         </Grid>
@@ -87,12 +89,21 @@ const BrowseProducts = () => {
                             variant='contained'>
                                 Add to Cart
                             </Button>
-                        </Grid>
-                        
+                        </Grid>     
                 </Grid>)}
             </Grid>  
             <Grid xs={3}></Grid>      
         </Grid>
+        {!loading &&
+        <Grid container spacing={2}
+                padding={2}
+                justifyContent="center"
+                alignItems="center">
+                <Pagination count={productsLength && Math.ceil(productsLength / limit)} 
+                color='standard'
+                onChange={handlePageClick}
+                page={currentPage}/>
+        </Grid>}
     </Box>
   )
 }

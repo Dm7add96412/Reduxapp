@@ -18,7 +18,6 @@ const SingleProduct = () => {
     useEffect(() => {
         if(productId) {
             dispatch(fetchSingleProduct(productId))
-            console.log(productId)
         }   else {
             console.log(error)
         }

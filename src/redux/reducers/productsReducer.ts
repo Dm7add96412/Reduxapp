@@ -9,7 +9,8 @@ const initialState: {
     error?: string,
     loading: boolean,
     productsLength?: number,
-    product?: Product
+    product?: Product,
+    page?: number
 } = {
     products: [],
     loading: false,
@@ -65,6 +66,9 @@ const productsSlice = createSlice(
     name: 'productsSlice',
     initialState,
     reducers: {
+        preservePagination: (state, action: PayloadAction<number>) => {
+            state.page = action.payload
+        }
         // addProduct: (state, action: PayloadAction<Product>) => {
         //     state.products.push(action.payload)
         // },
@@ -165,5 +169,5 @@ const productsSlice = createSlice(
 
 const productsReducer = productsSlice.reducer // contains current value of property 'productReducer' in global state
 
-// export const { addProduct, removeProduct, sortByPrice, } = productsSlice.actions
+export const { preservePagination } = productsSlice.actions
 export default productsReducer
