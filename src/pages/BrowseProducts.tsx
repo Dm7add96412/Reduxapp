@@ -5,25 +5,24 @@ import Box from '@mui/material/Box'
 import Pagination from '@mui/material/Pagination'
 import Button from '@mui/material/Button'
 import { useNavigate } from 'react-router-dom'
+import Alert from '@mui/material/Alert'
 
 import useAppSelector from '../hook/useAppSelector'
 import useAppDispatch from '../hook/useAppDispatch'
-import { fetchPProductsLength, fetchAllProductsPagination, preservePagination } from '../redux/reducers/productsReducer'
+import { fetchProductsLength, fetchAllProductsPagination, preservePagination } from '../redux/reducers/productsReducer'
 
 const BrowseProducts = () => {
-    const {products , loading, error, productsLength, page } = useAppSelector(state => state.productsReducer)
+    const {products , loading, error, productsLength, page, foundProducts } = useAppSelector(state => state.productsReducer)
     const [currentPage, setCurrentPage] = useState<number>(page || 1)
     const limit = 50
-
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
 
     useEffect(() => {
-        dispatch(fetchPProductsLength())
+        dispatch(fetchProductsLength())
     },[])
 
     useEffect(() => {
-        console.log(currentPage)
         const offset = (currentPage - 1) * limit
         dispatch(fetchAllProductsPagination({offset, limit}))
         }, [currentPage])
@@ -40,10 +39,11 @@ const BrowseProducts = () => {
         <Grid container spacing={2} 
                 padding={1}
                 justifyContent="center">
-            {loading ? <CircularProgress/> : 
+            {error ? <Alert severity="error"> Error fetching products! </Alert> : null}
+            {!error && loading ? <CircularProgress/> : 
             null}
         </Grid>
-        {!loading &&
+        {!error && !loading &&
         <Grid container spacing={2}
                 padding={2}
                 justifyContent="center"
@@ -60,7 +60,7 @@ const BrowseProducts = () => {
                 >
             <Grid xs={3}></Grid>
             <Grid xs={6} rowGap={6}>
-            {!loading && products.map(p => 
+            {!error && !loading && products.map(p => 
                 <Grid container spacing={-2} 
                     padding={4}
                     key={p.id}
@@ -69,7 +69,7 @@ const BrowseProducts = () => {
                     alignItems="center"
                     justifyContent="space-evenly">
                         <Grid xs={3} sx={{ display: 'flex', justifyContent: 'start' }}>
-                            <img src={p.images[0] ? p.images[0] : p.category?.image} alt={p.title} width="150" height="150"/>
+                            <img src={p.images[0] ? p.images[0] : p.category?.image } alt={p.title} width="150" height="150"/>
                         </Grid>
                         <Grid xs={3} sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
                             {p.title}
@@ -94,7 +94,7 @@ const BrowseProducts = () => {
             </Grid>  
             <Grid xs={3}></Grid>      
         </Grid>
-        {!loading &&
+        {!error && !loading &&
         <Grid container spacing={2}
                 padding={2}
                 justifyContent="center"

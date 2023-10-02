@@ -6,11 +6,11 @@ import PaginationQuery from "../../types/PaginationQuery";
 
 const initialState: {
     products: Product[],
-    error?: string,
+    error?: AxiosError,
     loading: boolean,
     productsLength?: number,
-    product?: Product,
     page?: number
+    foundProducts?: Product[]
 } = {
     products: [],
     loading: false,
@@ -25,13 +25,13 @@ export const fetchAllProductsPagination = createAsyncThunk(
             return data
         } catch(e) {
             const error = e as AxiosError
-            console.log('Axios error, fetch all products:', error.response?.status, error.message)
+            console.log('Error fetching all products pagination:', error.response?.status, error.message)
             return error
         }
     }
 )
 
-export const fetchPProductsLength = createAsyncThunk(
+export const fetchProductsLength = createAsyncThunk(
     'fetchProductsLength',
     async() => {
         try {
@@ -40,23 +40,36 @@ export const fetchPProductsLength = createAsyncThunk(
             return data.length
         } catch(e) {
             const error = e as AxiosError
-            console.log('Axios error, fetch all products:', error.response?.status, error.message)
+            console.log('Error fetching all products length:', error.response?.status, error.message)
             return error
         }
     }
 )
 
-export const fetchSingleProduct = createAsyncThunk(
-    'fetchSingleProduct',
-    async(productId: string) => {
+export const findProducts = createAsyncThunk(
+    'findProducts',
+    async(title: string) => {
         try {
-            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/${productId}`)
-            const data: Product = response.data
+            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/?title=${title}`)
+            const data: Product[] = response.data
             return data
         } catch(e) {
             const error = e as AxiosError
-            console.log('Axios error, fetch all products:', error.response?.status, error.message)
-            return error
+            console.log('Error with find products: ', error.response?.status, error.message)
+        }
+    }
+)
+
+export const filterByCategory = createAsyncThunk(
+    'filterByCategory',
+    async(category: string) => {
+        try {
+            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/?categoryId=${category}`)
+            const data: Product[] = response.data
+            return data
+        } catch(e) {
+            const error = e as AxiosError
+            console.log('Error with filtering by category', error.response?.status, error.message)
         }
     }
 )
@@ -96,6 +109,12 @@ const productsSlice = createSlice(
                         filteredProducts: action.payload,
                         loading: false
                     }
+                } else {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
                 }
             })
             builder.addCase(fetchAllProductsPagination.pending, (state, action) => {
@@ -109,57 +128,100 @@ const productsSlice = createSlice(
                     return {
                         ...state,
                         loading: false,
-                        error: action.error.message
+                        error: action.payload
                     }
                 }
             })
             // FETCH PRODUCTS LENGTH
-            builder.addCase(fetchPProductsLength.fulfilled, (state, action) => {
+            builder.addCase(fetchProductsLength.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
                     return {
                         ...state,
                         productsLength: action.payload,
                         loading: false
                     }
+                } else {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
                 }
             })
-            builder.addCase(fetchPProductsLength.pending, (state, action) => {
+            builder.addCase(fetchProductsLength.pending, (state, action) => {
                 return {
                     ...state,
                     loading: true
                 }
             })
-            builder.addCase(fetchPProductsLength.rejected, (state, action) => {
+            builder.addCase(fetchProductsLength.rejected, (state, action) => {
+                if (action.payload instanceof AxiosError) {  
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
+            // FIND PRODUCTS
+            builder.addCase(findProducts.fulfilled, (state, action) => {
+                if(!(action.payload instanceof AxiosError)) {
+                    return {
+                        ...state,
+                        loading: false,
+                        foundProducts: action.payload
+                    }
+                } else {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
+            builder.addCase(findProducts.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(findProducts.rejected, (state, action) => {
                 if (action.payload instanceof AxiosError) {
                     return {
                         ...state,
                         loading: false,
-                        error: action.error.message
+                        error: action.payload
                     }
                 }
             })
-            // FETCH SINGLE PRODUCT
-            builder.addCase(fetchSingleProduct.fulfilled, (state, action) => {
+            // FILTER BY CATEGORY
+            builder.addCase(filterByCategory.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
                     return {
                         ...state,
-                        product: action.payload,
-                        loading: false
+                        loading: false,
+                        foundProducts: action.payload
+                    }
+                } else {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
                     }
                 }
             })
-            builder.addCase(fetchSingleProduct.pending, (state, action) => {
+            builder.addCase(filterByCategory.pending, (state, action) => {
                 return {
                     ...state,
                     loading: true
                 }
             })
-            builder.addCase(fetchSingleProduct.rejected, (state, action) => {
-                if(action.payload instanceof AxiosError) {
+            builder.addCase(filterByCategory.rejected, (state, action) => {
+                if (action.payload instanceof AxiosError) {
                     return {
                         ...state,
-                        error: action.error.message,
-                        loading: false
+                        loading: false,
+                        error: action.payload
                     }
                 }
             })
