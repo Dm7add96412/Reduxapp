@@ -45,24 +45,3 @@ export type AppDispatch = typeof store.dispatch
 export const persistor = persistStore(store)
 
 export default store
-
-
-// const preCartReducer = JSON.parse(localStorage.getItem('cart')||'[]')
-
-// const store = configureStore({
-//     reducer: {
-        // productReducer,
-        // userReducer,
-        // cartReducer
-//     },
-//     preloadedState: {
-//         cartReducer: preCartReducer
-//     }
-// })
-
-// const updateLocalStorage = () => {
-//     const cart = store.getState().cartReducer
-//     localStorage.setItem('cart', JSON.stringify(cart))
-// }
-
-// store.subscribe(updateLocalStorage)

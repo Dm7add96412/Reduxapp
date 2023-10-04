@@ -3,17 +3,22 @@ import axios, { AxiosError } from "axios";
 
 import Product from "../../types/Product";
 import PaginationQuery from "../../types/PaginationQuery";
+import Categories from "../../types/Categories";
 
 const initialState: {
     products: Product[],
     error?: AxiosError,
     loading: boolean,
     productsLength?: number,
-    page?: number
-    foundProducts?: Product[]
+    page: number
+    foundProducts?: Product[],
+    filteredProducts?: Product[] | undefined,
+    categories?: Categories[]
 } = {
     products: [],
+    filteredProducts: undefined,
     loading: false,
+    page: 1
 }
 
 export const fetchAllProductsPagination = createAsyncThunk(
@@ -56,21 +61,39 @@ export const findProducts = createAsyncThunk(
         } catch(e) {
             const error = e as AxiosError
             console.log('Error with find products: ', error.response?.status, error.message)
+            return error
         }
     }
 )
 
-export const filterByCategory = createAsyncThunk(
-    'filterByCategory',
-    async(category: string) => {
+export const fetchAllCategories = createAsyncThunk(
+    'fetchAllCategories',
+    async() => {
         try {
-            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/?categoryId=${category}`)
+            const response = await axios.get(`https://api.escuelajs.co/api/v1/categories`)
+            const data: Categories[] = response.data
+            return data
+        } catch(e) {
+            const error = e as AxiosError
+            console.log('Error fetching all products length:', error.response?.status, error.message)
+            return error
+        }
+    }
+)
+
+export const fetchFilterProducts = createAsyncThunk(
+    'fetchFilterProducts',
+    async(categoryId: number) => {
+        try {
+            console.log(categoryId)
+            const response = await axios.get(`https://api.escuelajs.co/api/v1/categories/${categoryId}/products`)
             const data: Product[] = response.data
+            console.log('went into categoryId', data)
             return data
         } catch(e) {
             const error = e as AxiosError
             console.log('Error with filtering by category', error.response?.status, error.message)
-        }
+        } 
     }
 )
 
@@ -81,22 +104,21 @@ const productsSlice = createSlice(
     reducers: {
         preservePagination: (state, action: PayloadAction<number>) => {
             state.page = action.payload
+        },
+        clearFiltering: (state, action: PayloadAction<boolean>) => {
+            if (action.payload) {
+                state.filteredProducts = undefined
+            } else {
+                console.log('error with clearing filter')
+            }       
+        },
+        sortByPrice: (state, action: PayloadAction<'asc' | 'desc'>) => {
+            if(action.payload === 'asc') {
+                state.products.sort((a, b) => a.price - b.price)
+            } else {
+                state.products.sort((a, b) => b.price - a.price)
+            }
         }
-        // addProduct: (state, action: PayloadAction<Product>) => {
-        //     state.products.push(action.payload)
-        // },
-        // removeProduct: (state, action: PayloadAction<string>) => {
-        //     // console.log(action.payload)
-        //     const foundProduct = state.products.findIndex(p => p.id === action.payload)
-        //     foundProduct >= 0 ? state.products.splice(foundProduct, 1) : console.log('could not remove product index:', foundProduct)
-        // },
-        // sortByPrice: (state, action: PayloadAction<'asc' | 'desc'>) => {
-        //     if(action.payload === 'asc') {
-        //         state.products.sort((a, b) => a.price - b.price)
-        //     } else {
-        //         state.products.sort((a, b) => b.price - a.price)
-        //     }
-        // }
     },
         // async functions here, with all the three steps
         extraReducers: (builder) => {
@@ -106,7 +128,6 @@ const productsSlice = createSlice(
                     return {
                         ...state,
                         products: action.payload,
-                        filteredProducts: action.payload,
                         loading: false
                     }
                 } else {
@@ -194,13 +215,13 @@ const productsSlice = createSlice(
                     }
                 }
             })
-            // FILTER BY CATEGORY
-            builder.addCase(filterByCategory.fulfilled, (state, action) => {
+            // FETCH ALL CATEGORIES
+            builder.addCase(fetchAllCategories.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
                     return {
                         ...state,
                         loading: false,
-                        foundProducts: action.payload
+                        categories: action.payload
                     }
                 } else {
                     return {
@@ -210,13 +231,45 @@ const productsSlice = createSlice(
                     }
                 }
             })
-            builder.addCase(filterByCategory.pending, (state, action) => {
+            builder.addCase(fetchAllCategories.pending, (state, action) => {
                 return {
                     ...state,
                     loading: true
                 }
             })
-            builder.addCase(filterByCategory.rejected, (state, action) => {
+            builder.addCase(fetchAllCategories.rejected, (state, action) => {
+                if (action.payload instanceof AxiosError) {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
+
+            // FILTER PRODUCTS
+            builder.addCase(fetchFilterProducts.fulfilled, (state, action) => {
+                if(!(action.payload instanceof AxiosError)) {
+                    return {
+                        ...state,
+                        loading: false,
+                        filteredProducts: action.payload
+                    }
+                } else {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
+            builder.addCase(fetchFilterProducts.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(fetchFilterProducts.rejected, (state, action) => {
                 if (action.payload instanceof AxiosError) {
                     return {
                         ...state,
@@ -231,5 +284,5 @@ const productsSlice = createSlice(
 
 const productsReducer = productsSlice.reducer // contains current value of property 'productReducer' in global state
 
-export const { preservePagination } = productsSlice.actions
+export const { preservePagination, clearFiltering } = productsSlice.actions
 export default productsReducer
