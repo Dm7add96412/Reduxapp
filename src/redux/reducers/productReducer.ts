@@ -9,7 +9,7 @@ const initialState: {
     loading: boolean
 } = {
     product: {
-        id: '',
+        id: 0,
         title: '',
         price: 0,
         images: [],

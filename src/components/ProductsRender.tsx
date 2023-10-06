@@ -38,7 +38,6 @@ const ProductsRender: React.FC<ProductsRenderProps> = ({selectedProducts}) => {
                 justifyContent="space-evenly">
                     <Grid xs={3} sx={{ display: 'flex', justifyContent: 'start' }}>
                         {p.images[0] ? <img src={p.images[0]} alt={p.title} width="150" height="150"/> : 'no image'}
-                        
                     </Grid>
                     <Grid xs={3} sx={{ display: 'flex', justifyContent: 'start', alignSelf: 'center' }}>
                         {p.title}

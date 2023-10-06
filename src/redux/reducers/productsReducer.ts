@@ -3,18 +3,9 @@ import axios, { AxiosError } from "axios";
 
 import Product from "../../types/Product";
 import PaginationQuery from "../../types/PaginationQuery";
-import Categories from "../../types/Categories";
+import ProducstReducerState from "../../types/ProductsReducerState";
 
-const initialState: {
-    products: Product[],
-    error?: AxiosError,
-    loading: boolean,
-    productsLength?: number,
-    page: number
-    foundProducts?: Product[],
-    filteredProducts?: Product[] | undefined,
-    categories?: Categories[]
-} = {
+export const initialState: ProducstReducerState = {
     products: [],
     filteredProducts: undefined,
     loading: false,
@@ -66,33 +57,34 @@ export const findProducts = createAsyncThunk(
     }
 )
 
-export const fetchAllCategories = createAsyncThunk(
-    'fetchAllCategories',
-    async() => {
-        try {
-            const response = await axios.get(`https://api.escuelajs.co/api/v1/categories`)
-            const data: Categories[] = response.data
-            return data
-        } catch(e) {
-            const error = e as AxiosError
-            console.log('Error fetching all products length:', error.response?.status, error.message)
-            return error
-        }
-    }
-)
-
 export const fetchFilterProducts = createAsyncThunk(
     'fetchFilterProducts',
     async(categoryId: number) => {
         try {
-            console.log(categoryId)
             const response = await axios.get(`https://api.escuelajs.co/api/v1/categories/${categoryId}/products`)
             const data: Product[] = response.data
-            console.log('went into categoryId', data)
             return data
         } catch(e) {
             const error = e as AxiosError
             console.log('Error with filtering by category', error.response?.status, error.message)
+            return error
+        } 
+    }
+)
+
+export const deleteProduct = createAsyncThunk(
+    'deleteProduct',
+    async(productId: number) => {
+        try {
+            const result = await axios.delete<boolean>(`https://api.escuelajs.co/api/v1/products/${productId}`)
+            if(!result.data) {
+                throw new Error('Cannot delete!')
+            }
+            return productId
+        } catch(e) {
+            const error = e as AxiosError
+            console.log('Error with deleting a product', error.response?.status, error.message)
+            return { error: 'Cannot delete!' }
         } 
     }
 )
@@ -215,38 +207,6 @@ const productsSlice = createSlice(
                     }
                 }
             })
-            // FETCH ALL CATEGORIES
-            builder.addCase(fetchAllCategories.fulfilled, (state, action) => {
-                if(!(action.payload instanceof AxiosError)) {
-                    return {
-                        ...state,
-                        loading: false,
-                        categories: action.payload
-                    }
-                } else {
-                    return {
-                        ...state,
-                        loading: false,
-                        error: action.payload
-                    }
-                }
-            })
-            builder.addCase(fetchAllCategories.pending, (state, action) => {
-                return {
-                    ...state,
-                    loading: true
-                }
-            })
-            builder.addCase(fetchAllCategories.rejected, (state, action) => {
-                if (action.payload instanceof AxiosError) {
-                    return {
-                        ...state,
-                        loading: false,
-                        error: action.payload
-                    }
-                }
-            })
-
             // FILTER PRODUCTS
             builder.addCase(fetchFilterProducts.fulfilled, (state, action) => {
                 if(!(action.payload instanceof AxiosError)) {
@@ -278,11 +238,38 @@ const productsSlice = createSlice(
                     }
                 }
             })
+            // DELETE A PRODUCT
+            builder.addCase(deleteProduct.fulfilled, (state, action) => {
+                if(typeof action.payload === "number") {
+                    state.products = state.products.filter(p => p.id !== action.payload)
+                } else if (action.payload instanceof AxiosError){
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
+            builder.addCase(deleteProduct.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(deleteProduct.rejected, (state, action) => {
+                if (action.payload instanceof AxiosError) {
+                    return {
+                        ...state,
+                        loading: false,
+                        error: action.payload
+                    }
+                }
+            })
         }
     }
 ) //createSlice returns {actions, reducer, ...}
 
 const productsReducer = productsSlice.reducer // contains current value of property 'productReducer' in global state
 
-export const { preservePagination, clearFiltering } = productsSlice.actions
+export const { preservePagination, clearFiltering, sortByPrice} = productsSlice.actions
 export default productsReducer

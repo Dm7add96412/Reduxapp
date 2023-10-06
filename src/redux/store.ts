@@ -1,4 +1,4 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit"
+import { AnyAction, Reducer, combineReducers, configureStore } from "@reduxjs/toolkit"
 import storage from "redux-persist/lib/storage"
 import { persistReducer, persistStore,
     FLUSH,
@@ -13,24 +13,27 @@ import productsReducer from "./reducers/productsReducer"
 import userReducer from "./reducers/userReducers"
 import cartReducer from './reducers/cartReducer'
 import productReducer from './reducers/productReducer';
+import categoriesReducer from "./reducers/categoriesReducer"
 
 const persistConfig: PersistConfig<any> = {
     key: 'root',
     storage,
     // whitelist: ['cartReducer']
-    blacklist: ['userReducer', 'productsReducer', 'productReducer']
+    blacklist: ['userReducer', 'productsReducer', 'productReducer', 'categoriesReducer']
 }
 
 const rootReducer = combineReducers({
     productsReducer,
     userReducer,
     cartReducer,
-    productReducer
+    productReducer,
+    categoriesReducer
 })
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer: Reducer<AppState, AnyAction> = persistReducer(persistConfig, rootReducer)
 
-const store = configureStore({
+export const createStore = () => {
+  return configureStore({
     reducer: persistedReducer,
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -39,6 +42,18 @@ const store = configureStore({
       },
     }),
 })
+}
+// const store = configureStore({
+//     reducer: persistedReducer,
+//     middleware: (getDefaultMiddleware) =>
+//     getDefaultMiddleware({
+//       serializableCheck: {
+//         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+//       },
+//     }),
+// })
+
+const store = createStore()
 
 export type AppState = ReturnType<typeof rootReducer>
 export type AppDispatch = typeof store.dispatch

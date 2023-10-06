@@ -6,12 +6,14 @@ import Alert from '@mui/material/Alert'
 
 import useAppSelector from '../hook/useAppSelector'
 import useAppDispatch from '../hook/useAppDispatch'
-import { clearFiltering, fetchAllCategories, fetchFilterProducts, fetchProductsLength, fetchAllProductsPagination } from '../redux/reducers/productsReducer'
+import { clearFiltering, fetchFilterProducts, fetchProductsLength, fetchAllProductsPagination } from '../redux/reducers/productsReducer'
 import Categories from '../types/Categories'
+import { fetchAllCategories } from '../redux/reducers/categoriesReducer'
 
 const Filters = () => {
     const [selectedCategory, setSelectedCategory] = useState<Categories | undefined>(undefined)
-    const { categories, page } = useAppSelector(state => state.productsReducer)
+    const { page } = useAppSelector(state => state.productsReducer)
+    const { error, categories } = useAppSelector(state => state.categoriesReducer)
     const limit = 50
     const dispatch = useAppDispatch()
 
@@ -49,6 +51,7 @@ const Filters = () => {
             </Button>
           </Grid>
           <Grid xs={12} sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
+            {error ? <Alert severity="error"> Error fetching categories! </Alert> : null}
             {categories ? categories.map(c => 
               <Button
               size='small'
