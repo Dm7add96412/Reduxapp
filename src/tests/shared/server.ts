@@ -1,11 +1,11 @@
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import productsData from '../data/productsData'
+import Product from '../../types/Product'
+import CreateProduct from '../../types/CreateProduct'
 
 export const handlers = [
-    // rest.get('/api/user', (req, res, ctx) => {
-    //     return res(ctx.json(''), ctx.delay(150))
-    // })
+
     rest.delete('https://api.escuelajs.co/api/v1/products/:id', async (req, res, ctx) => {
         const {id} = req.params
         if (productsData.find(p => p.id === Number(id))) {
@@ -19,14 +19,82 @@ export const handlers = [
         }
 
     }),
-    rest.get('https://api.escuelajs.co/api/v1/products/', async (req, res, ctx) => {
-        const productsLength = productsData
+    rest.get('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
+        const products: Product[] = productsData
         return res(
-            ctx.json(productsLength)
+            ctx.json(products)
         )
     }),
-    rest.post('https://api.escuelajs.co/api/v1/products/', async (req, res, ctx) => {
-        const data = req.bodyUsed
+    // rest.get('https://api.escuelajs.co/api/v1/products?offset=&limit=', async (req, res, ctx) => {
+    //     console.log('does it go here?')
+    //     const url = new URL(req.url)
+    //     const offset = Number(url.searchParams.get('offset'))
+    //     const limit = Number(url.searchParams.get('limit'))
+    //     console.log('offset:', offset, 'limit', limit)
+
+    //     const paginatedProducts: Product[] = productsData.slice(offset, offset + limit)
+    //     return res(
+    //         ctx.json(paginatedProducts)
+    //     )
+    // }),
+    rest.post('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
+        const inputData: CreateProduct = await req.json()
+        const product = productsData.find(p => p.category?.id === inputData.categoryId)
+        console.log(inputData)
+        console.log(product?.category)
+        if (product !== undefined) {
+            console.log('product is created')
+            const newProduct: Product = {
+                id: productsData[2].id + 1,
+                images: inputData.images,
+                title: inputData.title,
+                price: inputData.price,
+                description: inputData.description,
+                category: product.category
+            }
+            try {
+
+                console.log(newProduct)
+            } catch (e) {
+                console.log(e)
+            }
+            return res(
+                ctx.json(newProduct)
+            )  
+        } else {
+            ctx.status(400)
+            return res(ctx.json({
+                message: ["price must be a positive number",
+                "images must contain at least 1 elements",
+                "each value in images must be a URL address",
+                "images must be an array"],
+                error: "Bad Request",
+                statusCode: 400
+            }))
+        }
+    }),
+    rest.put("https://api.escuelajs.co/api/v1/products/:id", async (req, res, ctx) => {
+        const input = await req.json()
+        const {id} = req.params
+
+        const foundIndex = productsData.findIndex(p => p.id === Number(id))
+        if(foundIndex > -1) {
+            productsData[foundIndex] = {
+                ...productsData[foundIndex],
+                ...input
+            }
+            res(ctx.json(productsData[foundIndex]))
+        } else {
+            ctx.status(400)
+            return res(ctx.json({
+                message: ["price must be a positive number",
+                "images must contain at least 1 elements",
+                "each value in images must be a URL address",
+                "images must be an array"],
+                error: "Bad Request",
+                statusCode: 400
+            }))
+        }
     })
 ]
 

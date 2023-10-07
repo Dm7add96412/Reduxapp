@@ -1,7 +1,6 @@
 interface PaginationQuery {
     offset: number,
-    limit: number,
-    title?: string
+    limit: number
 }
 
 export default PaginationQuery

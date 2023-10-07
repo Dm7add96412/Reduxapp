@@ -12,7 +12,7 @@ const productsData: Product[] = [
         "https://i.imgur.com/PK1WFTJ.jpeg"
         ],
         category: {
-        id: 16,
+        id: 1,
         name: "Electronics",
         image: "https://i.imgur.com/F1XLwX4.jpeg",
         }
@@ -26,7 +26,7 @@ const productsData: Product[] = [
         "https://i.imgur.com/PK1WFTJ.jpeg"
         ],
         category: {
-        id: 16,
+        id: 2,
         name: "Electronics",
         image: "https://i.imgur.com/F1XLwX4.jpeg",
         }
@@ -40,7 +40,7 @@ const productsData: Product[] = [
         "https://i.imgur.com/4XE4KwK.jpeg"
         ],
         category: {
-        id: 16,
+        id: 3,
         name: "Electronics",
         image: "https://i.imgur.com/F1XLwX4.jpeg",
         }

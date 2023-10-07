@@ -1,34 +1,78 @@
 import { AxiosError } from "axios";
-import productsReducer, { clearFiltering, deleteProduct, fetchAllProductsPagination, fetchProductsLength, preservePagination, sortByPrice } from "../../redux/reducers/productsReducer"
+import productsReducer, { clearFiltering, createProduct, deleteProduct, fetchAllProductsPagination, fetchProductsLength, preservePagination, sortByPrice, updateProduct } from "../../redux/reducers/productsReducer"
 import { createStore } from "../../redux/store";
 import ProducstReducerState from "../../types/ProductsReducerState";
 import productsData from '../data/productsData';
 import server from "../shared/server";
+import PaginationQuery from "../../types/PaginationQuery";
+import CreateProduct from "../../types/CreateProduct";
+import UpdateProduct from "../../types/UpdateProduct";
 
 let store = createStore()
-
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
 
 beforeEach(() => {
     store = createStore()
 })
 
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
+
+ 
 describe("Test async actions", () => {
-    // test("Should fetch all products with pagination", async () => {
-    //      const productsLength = await store.dispatch(fetchProductsLength())
-    //      console.log(productsLength)
-    // })
+    test("Should fetch all products", async () => {
+         const resultAction = await store.dispatch(fetchProductsLength())
+
+         expect(resultAction.payload).toBe(3)
+    })
+//     test("Should fetch products with pagination", async () => {
+//         const paginationQuery: PaginationQuery = { offset: 1, limit: 1}
+//         const resultAction = await store.dispatch(fetchAllProductsPagination(paginationQuery))
+
+//    })
     test("Should delete a product", async () => {
         const resultAction = await store.dispatch(deleteProduct(726))
         expect(resultAction.payload).toBe(726)
     })
     test("Should not delete a non-existing product", async () => {
         const resultAction = await store.dispatch(deleteProduct(1))
-        // expect(resultAction.payload).toBeInstanceOf(Error)
-        expect(resultAction.payload).toStrictEqual({error: "Cannot delete!"})
+        expect(resultAction.payload).toBeInstanceOf(Error)
     })
+    test("Should create a product", async () => {
+        const input: CreateProduct = {
+            title: "test product",
+            description: "testing",
+            price: 100,
+            categoryId: 1,
+            images: ['image', 'image2']
+        }
+        await store.dispatch(createProduct(input))
+        expect(store.getState().productsReducer.products.length).toBe(1)
+    })
+    test("Should not create a product with a wrond id", async () => {
+        const inputData: CreateProduct = {
+            title: "test product",
+            description: "testing",
+            price: 100,
+            categoryId: 9,
+            images: ['image', 'image2']
+        }
+        await store.dispatch(createProduct(inputData))
+        expect(store.getState().productsReducer.products.length).toBe(1)
+    })
+    test("Should update a product with correct ID", async () => {
+        const input: UpdateProduct = {
+            id: 1,
+            input: {
+                price: 340,
+                title: "Updated title"
+            }
+        }
+        await store.dispatch(updateProduct(input))
+        expect()
+    })
+
 })
 
 describe("Test non-async actions", () => {

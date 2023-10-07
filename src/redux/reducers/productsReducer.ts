@@ -1,9 +1,11 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios, { AxiosError } from "axios";
+import axios, { Axios, AxiosError } from "axios";
 
 import Product from "../../types/Product";
 import PaginationQuery from "../../types/PaginationQuery";
 import ProducstReducerState from "../../types/ProductsReducerState";
+import CreateProduct from "../../types/CreateProduct";
+import UpdateProduct from "../../types/UpdateProduct";
 
 export const initialState: ProducstReducerState = {
     products: [],
@@ -83,9 +85,36 @@ export const deleteProduct = createAsyncThunk(
             return productId
         } catch(e) {
             const error = e as AxiosError
-            console.log('Error with deleting a product', error.response?.status, error.message)
-            return { error: 'Cannot delete!' }
+            // console.log('Error with deleting a product', error.response?.status, error.message)
+            return error
+            // { error: 'Cannot delete!' }
         } 
+    }
+)
+
+export const createProduct = createAsyncThunk(
+    'createProduct',
+    async(newProduct: CreateProduct, {rejectWithValue}) => {
+        try {
+            const result = await axios.post<Product>(`https://api.escuelajs.co/api/v1/products/`, newProduct)
+            return result.data
+        } catch(e) {
+            const error = e as AxiosError
+            return rejectWithValue(error.message)
+        }  
+    }
+)
+
+export const updateProduct = createAsyncThunk(
+    'updateProduct',
+    async({input, id}: UpdateProduct, {rejectWithValue}) => {
+        try {
+            const result = await axios.put<Product>(`https://api.escuelajs.co/api/v1/products/${id}`, input)
+            return result.data
+        } catch(e) {
+            const error = e as AxiosError
+            return rejectWithValue(error.message)
+        }  
     }
 )
 
@@ -264,6 +293,40 @@ const productsSlice = createSlice(
                         error: action.payload
                     }
                 }
+            })
+            // CREATE A PRODUCT
+            builder.addCase(createProduct.fulfilled, (state, action) => {
+                state.products.push(action.payload)
+            })
+            builder.addCase(createProduct.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(createProduct.rejected, (state, action) => {
+                state.error = action.payload as AxiosError
+            })
+            // UPDATE PRODUCT
+            builder.addCase(updateProduct.fulfilled, (state, action) => {
+                const foundIndex = state.products.findIndex(p => p.id === action.meta.arg.id)
+                if(foundIndex) {
+                    state.products[foundIndex] = {
+                        ...state.products[foundIndex],
+                        ...action.payload
+                    }
+                } else {
+                    state.error = new Error('Did not find product to update') as AxiosError
+                }
+            })
+            builder.addCase(updateProduct.pending, (state, action) => {
+                return {
+                    ...state,
+                    loading: true
+                }
+            })
+            builder.addCase(updateProduct.rejected, (state, action) => {
+                state.error = action.payload as AxiosError
             })
         }
     }
