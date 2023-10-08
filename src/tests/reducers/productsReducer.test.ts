@@ -26,16 +26,16 @@ describe("Test async actions", () => {
 
          expect(resultAction.payload).toBe(3)
     })
-//     test("Should fetch products with pagination", async () => {
-//         const paginationQuery: PaginationQuery = { offset: 1, limit: 1}
-//         const resultAction = await store.dispatch(fetchAllProductsPagination(paginationQuery))
-
-//    })
+    test("Should fetch products with pagination", async () => {
+        const paginationQuery: PaginationQuery = { offset: 1, limit: 1}
+        const resultAction = await store.dispatch(fetchAllProductsPagination(paginationQuery))
+        // console.log(resultAction)
+   })
     test("Should delete a product", async () => {
         const resultAction = await store.dispatch(deleteProduct(726))
         expect(resultAction.payload).toBe(726)
     })
-    test("Should not delete a non-existing product", async () => {
+    test("Should NOT delete a non-existing product", async () => {
         const resultAction = await store.dispatch(deleteProduct(1))
         expect(resultAction.payload).toBeInstanceOf(Error)
     })
@@ -50,7 +50,7 @@ describe("Test async actions", () => {
         await store.dispatch(createProduct(input))
         expect(store.getState().productsReducer.products.length).toBe(1)
     })
-    test("Should not create a product with a wrond id", async () => {
+    test("Should NOT create a product with a wrond id", async () => {
         const inputData: CreateProduct = {
             title: "test product",
             description: "testing",
@@ -59,27 +59,59 @@ describe("Test async actions", () => {
             images: ['image', 'image2']
         }
         await store.dispatch(createProduct(inputData))
-        expect(store.getState().productsReducer.products.length).toBe(1)
+        expect(store.getState().productsReducer.products.length).toBe(0)
     })
     test("Should update a product with correct ID", async () => {
         const input: UpdateProduct = {
-            id: 1,
+            id: 726,
             input: {
                 price: 340,
                 title: "Updated title"
             }
         }
-        await store.dispatch(updateProduct(input))
-        expect()
+        const action = await store.dispatch(updateProduct(input))
+        const product = {id: 726,
+            title: 'Updated title',
+            price: 340,
+            description: 'A very powerful computer with 3 pictures',
+            images: [
+              'https://i.imgur.com/r7CYJWI.jpeg',
+              'https://i.imgur.com/4XE4KwK.jpeg',
+              'https://i.imgur.com/PK1WFTJ.jpeg'
+            ],
+            category: {
+              id: 1,
+              name: 'Electronics',
+              image: 'https://i.imgur.com/F1XLwX4.jpeg'
+            }}
+        expect(action.payload).toMatchObject(product)
+    })
+    test("Should NOT update a product with incorrect ID", async () => {
+        const input: UpdateProduct = {
+            id: 9345,
+            input: {
+                price: 340,
+                title: "Updated title"
+            }
+        }
+        const action = await store.dispatch(updateProduct(input))
+        const errorMessage = {
+            message: [
+              'price must be a positive number',
+              'images must contain at least 1 elements',
+              'each value in images must be a URL address',
+              'images must be an array'
+            ],
+            error: 'Bad Request',
+            statusCode: 400
+          }
+         expect(action.payload).toMatchObject(errorMessage)
     })
 
 })
 
 describe("Test non-async actions", () => {
     test("Should sort products by price ASC", () => {
-        // store.dispatch(setUpState(productsData))
-        // store.dispatch(sortByPrice('asc'))
-        // const products = store.getState().productsReducer.products
         const state: ProducstReducerState = {
             loading: false,
             page: 1,

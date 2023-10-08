@@ -6,6 +6,7 @@ import PaginationQuery from "../../types/PaginationQuery";
 import ProducstReducerState from "../../types/ProductsReducerState";
 import CreateProduct from "../../types/CreateProduct";
 import UpdateProduct from "../../types/UpdateProduct";
+import { useParams } from 'react-router-dom';
 
 export const initialState: ProducstReducerState = {
     products: [],
@@ -296,7 +297,10 @@ const productsSlice = createSlice(
             })
             // CREATE A PRODUCT
             builder.addCase(createProduct.fulfilled, (state, action) => {
-                state.products.push(action.payload)
+                if(action.payload.title) {
+                    state.products.push(action.payload)
+                }
+                
             })
             builder.addCase(createProduct.pending, (state, action) => {
                 return {
@@ -309,6 +313,7 @@ const productsSlice = createSlice(
             })
             // UPDATE PRODUCT
             builder.addCase(updateProduct.fulfilled, (state, action) => {
+                
                 const foundIndex = state.products.findIndex(p => p.id === action.meta.arg.id)
                 if(foundIndex) {
                     state.products[foundIndex] = {

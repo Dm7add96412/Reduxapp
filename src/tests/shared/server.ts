@@ -25,25 +25,23 @@ export const handlers = [
             ctx.json(products)
         )
     }),
-    // rest.get('https://api.escuelajs.co/api/v1/products?offset=&limit=', async (req, res, ctx) => {
-    //     console.log('does it go here?')
-    //     const url = new URL(req.url)
-    //     const offset = Number(url.searchParams.get('offset'))
-    //     const limit = Number(url.searchParams.get('limit'))
-    //     console.log('offset:', offset, 'limit', limit)
+    rest.get('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
+        console.log('does it go here?')
+        const url = new URL(req.url)
+        const offset = Number(url.searchParams.get('offset'))
+        const limit = Number(url.searchParams.get('limit'))
+        console.log('offset:', offset, 'limit', limit)
 
-    //     const paginatedProducts: Product[] = productsData.slice(offset, offset + limit)
-    //     return res(
-    //         ctx.json(paginatedProducts)
-    //     )
-    // }),
+        const paginatedProducts: Product[] = productsData.slice(offset, offset + limit)
+        return res(
+            ctx.json(paginatedProducts)
+        )
+    }),
     rest.post('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
         const inputData: CreateProduct = await req.json()
         const product = productsData.find(p => p.category?.id === inputData.categoryId)
-        console.log(inputData)
-        console.log(product?.category)
+
         if (product !== undefined) {
-            console.log('product is created')
             const newProduct: Product = {
                 id: productsData[2].id + 1,
                 images: inputData.images,
@@ -52,12 +50,7 @@ export const handlers = [
                 description: inputData.description,
                 category: product.category
             }
-            try {
 
-                console.log(newProduct)
-            } catch (e) {
-                console.log(e)
-            }
             return res(
                 ctx.json(newProduct)
             )  
@@ -79,11 +72,10 @@ export const handlers = [
 
         const foundIndex = productsData.findIndex(p => p.id === Number(id))
         if(foundIndex > -1) {
-            productsData[foundIndex] = {
+            return res(ctx.json({
                 ...productsData[foundIndex],
                 ...input
-            }
-            res(ctx.json(productsData[foundIndex]))
+            }))
         } else {
             ctx.status(400)
             return res(ctx.json({
