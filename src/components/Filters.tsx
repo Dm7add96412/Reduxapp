@@ -49,9 +49,10 @@ const Filters = () => {
             onClick={() => emptyFilters()}>
               ALL PRODUCTS
             </Button>
-          </Grid>
-          <Grid xs={12} sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
             {error ? <Alert severity="error"> Error fetching categories! </Alert> : null}
+          </Grid>
+          <Grid xs={12} flexWrap='wrap' sx={{ display: 'flex', justifyContent: 'center', alignSelf: 'center' }}>
+            
             {categories ? categories.map(c => 
               <Button
               size='small'

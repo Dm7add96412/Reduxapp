@@ -297,47 +297,33 @@ const productsSlice = createSlice(
                 if(typeof action.payload === "number") {
                     state.products = state.products.filter(p => p.id !== action.payload)
                 } else if (action.payload instanceof AxiosError){
-                    return {
-                        ...state,
-                        loading: false,
-                        error: action.payload
-                    }
+                    state.error = action.payload as AxiosError
                 }
             })
             builder.addCase(deleteProduct.pending, (state, action) => {
-                return {
-                    ...state,
-                    loading: true
-                }
+                state.loading = true
             })
             builder.addCase(deleteProduct.rejected, (state, action) => {
-                if (action.payload instanceof AxiosError) {
-                    return {
-                        ...state,
-                        loading: false,
-                        error: action.payload
-                    }
-                }
+                    state.error = action.payload as AxiosError
             })
             // CREATE A PRODUCT
             builder.addCase(createProduct.fulfilled, (state, action) => {
-                if(action.payload.title) {
-                    state.products.push(action.payload)
+                if(!(action.payload instanceof AxiosError)) {
+                    if(action.payload.id) {
+                        state.products.push(action.payload)
+                    } 
+                } else {
+                    state.error = action.payload as AxiosError
                 }
-                
             })
             builder.addCase(createProduct.pending, (state, action) => {
-                return {
-                    ...state,
-                    loading: true
-                }
+                state.loading = true
             })
             builder.addCase(createProduct.rejected, (state, action) => {
                 state.error = action.payload as AxiosError
             })
             // UPDATE PRODUCT
-            builder.addCase(updateProduct.fulfilled, (state, action) => {
-                
+            builder.addCase(updateProduct.fulfilled, (state, action) => { 
                 const foundIndex = state.products.findIndex(p => p.id === action.meta.arg.id)
                 if(foundIndex) {
                     state.products[foundIndex] = {
@@ -349,10 +335,7 @@ const productsSlice = createSlice(
                 }
             })
             builder.addCase(updateProduct.pending, (state, action) => {
-                return {
-                    ...state,
-                    loading: true
-                }
+                state.loading = true
             })
             builder.addCase(updateProduct.rejected, (state, action) => {
                 state.error = action.payload as AxiosError

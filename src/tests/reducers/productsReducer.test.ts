@@ -48,7 +48,7 @@ describe("Test async actions", () => {
         await store.dispatch(createProduct(input))
         expect(store.getState().productsReducer.products.length).toBe(1)
     })
-    test("Should NOT create a product with a wrond id", async () => {
+    test("Should NOT create a product with a wrong id", async () => {
         const inputData: CreateProduct = {
             title: "test product",
             description: "testing",
