@@ -98,10 +98,22 @@ export const createProduct = createAsyncThunk(
     async(newProduct: CreateProduct, {rejectWithValue}) => {
         try {
             const result = await axios.post<Product>(`https://api.escuelajs.co/api/v1/products/`, newProduct)
-            return result.data
+            const data = result.data
+            const product: Product = {
+                id: data.id,
+                description: data.description,
+                title: data.title,
+                price: data.price,
+                images: data.images
+            }
+            if(product.id) {
+                return data
+            } else {
+                throw new Error('Cannot create product')
+            }  
         } catch(e) {
             const error = e as AxiosError
-            return rejectWithValue(error.message)
+            return error
         }  
     }
 )
@@ -111,10 +123,22 @@ export const updateProduct = createAsyncThunk(
     async({input, id}: UpdateProduct, {rejectWithValue}) => {
         try {
             const result = await axios.put<Product>(`https://api.escuelajs.co/api/v1/products/${id}`, input)
-            return result.data
+            const data = result.data
+            const product: Product = {
+                id: data.id,
+                description: data.description,
+                title: data.title,
+                price: data.price,
+                images: data.images
+            }
+            if(product.id) {
+                return data
+            } else {
+                throw new Error('Cannot update product')
+            }  
         } catch(e) {
             const error = e as AxiosError
-            return rejectWithValue(error.message)
+            return error
         }  
     }
 )

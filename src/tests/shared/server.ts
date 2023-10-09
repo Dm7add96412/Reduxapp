@@ -17,7 +17,6 @@ export const handlers = [
                 ctx.json(false)
             )
         }
-
     }),
     rest.get('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
         const products: Product[] = productsData
@@ -25,18 +24,31 @@ export const handlers = [
             ctx.json(products)
         )
     }),
-    rest.get('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
-        console.log('does it go here?')
-        const url = new URL(req.url)
-        const offset = Number(url.searchParams.get('offset'))
-        const limit = Number(url.searchParams.get('limit'))
-        console.log('offset:', offset, 'limit', limit)
-
-        const paginatedProducts: Product[] = productsData.slice(offset, offset + limit)
-        return res(
-            ctx.json(paginatedProducts)
-        )
+    rest.get('https://api.escuelajs.co/api/v1/products/:id', async (req, res, ctx) => {
+        const {id} = req.params
+        const product = productsData.find(p => p.id === Number(id))
+        if (product) {
+            return res(ctx.json(product))
+        } else {
+            const error = {
+                "path": "/api/v1/products/4",
+                "name": "EntityNotFoundError",
+                "message": "Could not find any entity of type \"Product\" matching: {\n    \"relations\": [\n        \"category\"\n    ],\n    \"where\": {\n        \"id\": 4\n    }\n}"
+                }
+            ctx.status(400)
+            return res(ctx.json(error))
+        }
     }),
+    // rest.get('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
+    //     console.log('does it go here?')
+    //     const offset = Number(req.url.searchParams.get('offset'));
+    //     const limit = Number(req.url.searchParams.get('limit'));
+    //     console.log('offset:', offset, 'limit', limit)
+    //     const paginatedProducts: Product[] = productsData.slice(offset, offset + limit)
+    //     return res(
+    //         ctx.json(paginatedProducts)
+    //     )
+    // }),
     rest.post('https://api.escuelajs.co/api/v1/products', async (req, res, ctx) => {
         const inputData: CreateProduct = await req.json()
         const product = productsData.find(p => p.category?.id === inputData.categoryId)
@@ -89,6 +101,8 @@ export const handlers = [
         }
     })
 ]
+
+
 
 const server = setupServer(...handlers)
 

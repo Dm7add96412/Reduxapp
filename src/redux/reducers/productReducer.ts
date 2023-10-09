@@ -22,9 +22,20 @@ export const fetchSingleProduct = createAsyncThunk(
     'fetchSingleProductAsync',
     async(id: string) => {
         try{
-            const response = await axios.get(`https://api.escuelajs.co/api/v1/products/${id}`)
-            const data: Product = response.data
-            return data
+            const response = await axios.get<Product>(`https://api.escuelajs.co/api/v1/products/${id}`)
+            const data = response.data
+            const product: Product = {
+                id: data.id,
+                description: data.description,
+                title: data.title,
+                price: data.price,
+                images: data.images
+            }
+            if(product.id) {
+                return data
+            } else {
+                throw new Error('Cannot fetch single product data')
+            }  
         } catch(e) {
             const error = e as AxiosError
             console.log('Axios error, fetch single product:', error.response?.status, error.message)

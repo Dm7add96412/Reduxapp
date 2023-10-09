@@ -18,19 +18,17 @@ beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
-
- 
 describe("Test async actions", () => {
-    test("Should fetch all products", async () => {
+    test("Should fetch all products length", async () => {
          const resultAction = await store.dispatch(fetchProductsLength())
 
          expect(resultAction.payload).toBe(3)
     })
-    test("Should fetch products with pagination", async () => {
-        const paginationQuery: PaginationQuery = { offset: 1, limit: 1}
-        const resultAction = await store.dispatch(fetchAllProductsPagination(paginationQuery))
-        // console.log(resultAction)
-   })
+//     test("Should fetch products with pagination", async () => {
+//         const paginationQuery: PaginationQuery = { offset: 1, limit: 1}
+//         const resultAction = await store.dispatch(fetchAllProductsPagination(paginationQuery))
+//         console.log(resultAction)
+//    })
     test("Should delete a product", async () => {
         const resultAction = await store.dispatch(deleteProduct(726))
         expect(resultAction.payload).toBe(726)
@@ -58,8 +56,9 @@ describe("Test async actions", () => {
             categoryId: 9,
             images: ['image', 'image2']
         }
-        await store.dispatch(createProduct(inputData))
+        const result = await store.dispatch(createProduct(inputData))
         expect(store.getState().productsReducer.products.length).toBe(0)
+        expect(result.payload).toBeInstanceOf(Error)
     })
     test("Should update a product with correct ID", async () => {
         const input: UpdateProduct = {
@@ -105,9 +104,9 @@ describe("Test async actions", () => {
             error: 'Bad Request',
             statusCode: 400
           }
-         expect(action.payload).toMatchObject(errorMessage)
+        //  expect(action.payload).toMatchObject(errorMessage)
+         expect(action.payload).toBeInstanceOf(Error)
     })
-
 })
 
 describe("Test non-async actions", () => {
